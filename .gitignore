@@ -1,0 +1,19 @@
+# MATLAB temporary & autosave files
+*.asv
+*.m~
+*.mat~
+slprj/
+*.slxc
+
+# macOS
+.DS_Store
+._*
+
+# Output & runtime artifacts
+output/*.png
+output/*.jpg
+output/*.pdf
+!output/.gitkeep
+
+# External datasets (downloaded separately)
+data/
