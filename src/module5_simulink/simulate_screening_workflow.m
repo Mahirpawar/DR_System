@@ -1,4 +1,4 @@
-function results = simulate_screening_workflow(params)
+function results = simulate_screening_workflow(params, show_plots)
 % FUNCTION: simulate_screening_workflow
 % MODULE: 6 - Simulink / Screening Workflow Modeling
 % STATUS: DONE_TESTED
@@ -13,7 +13,8 @@ function results = simulate_screening_workflow(params)
 %   resource-sizing recommendations (cameras, doctors, bandwidth).
 %
 % INPUTS:
-%   params (struct, optional) - workflow configuration parameters:
+%   params (struct or numeric, optional) - workflow configuration parameters
+%       or scalar number of patients to simulate (default: 10000). If struct:
 %       - annual_target: total patients/year (default: 100000)
 %       - operating_days: operational screening days/year (default: 250)
 %       - n_cameras: number of portable camera units across district (default: 10)
@@ -26,6 +27,7 @@ function results = simulate_screening_workflow(params)
 %       - review_time_sec: doctor review time per case (default: 30.0)
 %       - referable_rate: proportion of patients needing review (default: 0.22)
 %       - n_sim_patients: number of patients to simulate (default: 10000)
+%   show_plots (logical, optional) - whether to display queuing plots (default: false)
 %
 % OUTPUTS:
 %   results (struct) - quantitative queuing metrics & resource allocation:
@@ -49,6 +51,11 @@ function results = simulate_screening_workflow(params)
     % --- Step 1: Initialize Parameters with Defaults ---
     if nargin < 1 || isempty(params)
         params = struct();
+    elseif isnumeric(params)
+        params = struct('n_sim_patients', params);
+    end
+    if nargin < 2 || isempty(show_plots)
+        show_plots = false;
     end
 
     annual_target        = get_param(params, 'annual_target', 100000);
@@ -175,6 +182,35 @@ function results = simulate_screening_workflow(params)
         'an AI cloud server with latency <= %.1fs/image, and minimum uplink bandwidth of %.1f Mbps per clinic.'], ...
         annual_target, n_cameras, patients_per_cam_day, acq_time_min, ...
         n_doctors, cases_per_doc_day, review_time_sec, ai_latency_sec, bandwidth_mbps);
+
+    % --- Optional: Visual Performance Dashboard ---
+    if show_plots
+        figure('Name', 'District Screening Queuing Simulation', 'Color', 'w', ...
+               'Position', [100, 100, 950, 420]);
+
+        subplot(1, 2, 1);
+        histogram(doc_wait_hours, 30, 'FaceColor', [0.2, 0.5, 0.8], 'EdgeColor', 'w');
+        hold on;
+        xline(24.0, 'r--', 'LineWidth', 2, 'Label', '24h SLA Target');
+        title(sprintf('Doctor Review Turnaround (%.1f%% < 24h)', sla_compliance), 'FontSize', 11);
+        xlabel('Turnaround Wait Time (Hours)');
+        ylabel('Patient Count');
+        grid on;
+
+        subplot(1, 2, 2);
+        b = bar([util_cam, util_net, util_ai, util_doc] * 100);
+        b.FaceColor = 'flat';
+        b.CData(1,:) = [0.2, 0.6, 0.4];
+        b.CData(2,:) = [0.3, 0.4, 0.7];
+        b.CData(3,:) = [0.8, 0.6, 0.1];
+        b.CData(4,:) = [0.8, 0.3, 0.3];
+        set(gca, 'XTickLabel', {'Cameras', 'Network', 'AI Server', 'Doctors'}, 'FontSize', 10);
+        ylabel('Resource Utilization (%)');
+        title('District Workflow Stage Utilization', 'FontSize', 11);
+        ylim([0, 100]);
+        yline(100, 'k:');
+        grid on;
+    end
 
     % Assemble results struct
     results = struct( ...
