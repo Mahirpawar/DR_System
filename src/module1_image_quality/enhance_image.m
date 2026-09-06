@@ -47,7 +47,8 @@ function enhanced_img = enhance_image(img)
     % --- Step 1: Illumination normalization + contrast via CLAHE on L channel ---
     lab = rgb2lab(img);
     L = lab(:,:,1) / 100;  % normalize L to [0,1] for adapthisteq
-    L_eq = adapthisteq(L, 'ClipLimit', 0.01, 'Distribution', 'rayleigh');
+    % Use uniform distribution to enhance contrast smoothly without introducing speckled noise
+    L_eq = adapthisteq(L, 'ClipLimit', 0.008, 'Distribution', 'uniform');
     lab(:,:,1) = L_eq * 100;
     img_clahe = lab2rgb(lab);
     img_clahe = max(0, min(1, img_clahe)); % clamp numerical overshoot
