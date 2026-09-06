@@ -25,6 +25,8 @@ if nargin < 1 || isempty(image_path)
 end
 
 addpath(genpath('src'));
+rehash toolboxcache;
+rehash;
 
 fprintf('=== DR Screening Pipeline — Integration Run ===\n\n');
 
@@ -74,8 +76,20 @@ fprintf('[4/6] Grading severity (fusion of CNN + rule paths)...\n');
 [cnn_grade, cnn_probs] = grade_severity_cnn(img_processed, []);
 [rule_grade, rule_confidence] = grade_severity_rules(vessel_mask, ma_count, lesion_counts);
 [final_grade, final_confidence, is_referable] = fuse_grading(cnn_grade, cnn_probs, rule_grade, rule_confidence);
-fprintf('      CNN path grade: %d | Rule path grade: %d | Fused grade: %d\n', cnn_grade, rule_grade, final_grade);
-fprintf('      Referable DR: %d | Raw confidence: %.2f\n', is_referable, final_confidence);
+
+fprintf('\n  ================ CLINICAL EVIDENCE AUDIT ================\n');
+fprintf('  Microaneurysms:   %d\n', ma_count);
+fprintf('  Hard Exudates:    %d\n', lesion_counts.n_hard_exudates);
+fprintf('  Soft Exudates:    %d\n', lesion_counts.n_soft_exudates);
+fprintf('  Hemorrhages:      %d\n', lesion_counts.n_hemorrhages);
+fprintf('  Lesion Area Frac: %.3f%%\n', lesion_counts.total_lesion_area_fraction * 100);
+fprintf('  ---------------------------------------------------------\n');
+fprintf('  Path A (CNN):     Grade %d | Probabilities: [%.2f, %.2f, %.2f, %.2f, %.2f]\n', ...
+    cnn_grade, cnn_probs(1), cnn_probs(2), cnn_probs(3), cnn_probs(4), cnn_probs(5));
+fprintf('  Path B (Rules):   Grade %d | Rule Confidence: %.2f\n', rule_grade, rule_confidence);
+fprintf('  Two-Path Fusion:  Grade %d | Raw Confidence: %.2f | Referable: %d\n', ...
+    final_grade, final_confidence, is_referable);
+fprintf('  =========================================================\n\n');
 
 % --- Stage 5: Explainability ---
 fprintf('[5/6] Generating explainability outputs...\n');

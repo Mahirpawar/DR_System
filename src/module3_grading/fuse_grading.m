@@ -93,7 +93,7 @@ function [final_grade, final_confidence, is_referable] = fuse_grading(cnn_grade,
     fused_probs = w_cnn * cnn_probs + w_rule * rule_probs;
 
     % --- Step 3: Clinical Screening Safety Rule (Asymmetric Loss) ---
-    % If explicit lesions were detected (Rule Grade >= 2) with strong confidence,
+    % 3a. Sensitivity Guard: If explicit lesions were detected (Rule Grade >= 2),
     % prevent an under-calling CNN from yielding a dangerous False Negative.
     if rule_g >= 2 && rule_confidence >= 0.78 && cnn_g < 2
         referable_boost = 0.20 * rule_confidence;
@@ -101,7 +101,15 @@ function [final_grade, final_confidence, is_referable] = fuse_grading(cnn_grade,
         fused_probs(1:2) = max(0, fused_probs(1:2) - (referable_boost / 2.0));
     end
 
-    % If both paths agree on non-referable (grades 0 or 1), preserve specificity
+    % 3b. Specificity Guard: If physical lesion segmentation reveals ZERO lesions (Rule Grade 0),
+    % prevent an overfitted CNN from triggering a false positive referral.
+    if rule_g == 0 && rule_confidence >= 0.85 && cnn_g >= 2
+        non_referable_guard = 0.35 * rule_confidence;
+        fused_probs(1) = fused_probs(1) + non_referable_guard;
+        fused_probs(3:5) = max(0, fused_probs(3:5) - (non_referable_guard / 3.0));
+    end
+
+    % 3c. If both paths agree on non-referable (grades 0 or 1), preserve specificity
     if cnn_g <= 1 && rule_g <= 1
         non_referable_boost = 0.15;
         fused_probs(1:2) = fused_probs(1:2) + (non_referable_boost / 2.0);
