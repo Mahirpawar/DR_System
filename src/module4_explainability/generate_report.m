@@ -85,19 +85,19 @@ function report_fig = generate_report(img, overlay_img, final_grade, calibrated_
         'Name', 'DR Screening Diagnostic Report', 'NumberTitle', 'off');
 
     % --- Panel 1: Original Fundus Photo ---
-    ax1 = axes('Position', [0.03, 0.14, 0.28, 0.76], 'Parent', report_fig);
+    ax1 = axes('Position', [0.02, 0.14, 0.28, 0.76], 'Parent', report_fig);
     imshow(img, 'Parent', ax1);
     title(ax1, '1. Patient Fundus Photograph', 'FontSize', 12.5, 'FontWeight', 'bold', 'Color', [0.1, 0.1, 0.15]);
 
     % --- Panel 2: Explainable AI Heatmap & Lesion Anchors ---
-    ax2 = axes('Position', [0.33, 0.14, 0.28, 0.76], 'Parent', report_fig);
+    ax2 = axes('Position', [0.31, 0.14, 0.28, 0.76], 'Parent', report_fig);
     imshow(overlay_img, 'Parent', ax2);
     title(ax2, '2. Explainable AI Overlay (Grad-CAM + Lesions)', 'FontSize', 12.5, 'FontWeight', 'bold', 'Color', [0.1, 0.1, 0.15]);
     xlabel(ax2, 'Legend: Cyan = MAs | Yellow = Exudates | Magenta = Hemorrhages', ...
-        'FontSize', 9.5, 'FontWeight', 'bold', 'Color', [0.2, 0.2, 0.3]);
+        'FontSize', 9, 'FontWeight', 'bold', 'Color', [0.2, 0.2, 0.3]);
 
     % --- Panel 3: Structured Clinical Triage & Sign-Off Card ---
-    ax3 = axes('Position', [0.64, 0.05, 0.34, 0.90], 'Parent', report_fig);
+    ax3 = axes('Position', [0.61, 0.04, 0.37, 0.92], 'Parent', report_fig);
     set(ax3, 'Visible', 'off');
     xlim(ax3, [0, 1]);
     ylim(ax3, [0, 1]);
@@ -122,38 +122,40 @@ function report_fig = generate_report(img, overlay_img, final_grade, calibrated_
         'Color', [0.95, 0.95, 0.95], 'HorizontalAlignment', 'center', 'Parent', ax3, 'Interpreter', 'none');
 
     % Clinical Diagnosis Section
-    text(0.04, 0.78, 'DIAGNOSIS & AI CONFIDENCE', 'FontSize', 10.5, 'FontWeight', 'bold', ...
-        'Color', [0.2, 0.2, 0.3], 'Parent', ax3, 'Interpreter', 'none');
-    text(0.04, 0.71, sprintf('ICDR Severity: %s', grade_str), 'FontSize', 10.5, ...
-        'FontWeight', 'bold', 'Color', [0.05, 0.05, 0.1], 'Parent', ax3, 'Interpreter', 'none');
-    text(0.04, 0.65, sprintf('AI Confidence: %.1f%% (Empirically Calibrated)', conf_pct), ...
-        'FontSize', 10, 'Color', [0.2, 0.25, 0.35], 'Parent', ax3, 'Interpreter', 'none');
+    text(0.04, 0.78, 'DIAGNOSIS & AI CONFIDENCE', 'FontSize', 10, 'FontWeight', 'bold', ...
+        'Color', [0.2, 0.25, 0.35], 'Parent', ax3, 'Interpreter', 'none');
+    text(0.04, 0.72, 'ICDR Severity:', 'FontSize', 9, 'FontWeight', 'bold', ...
+        'Color', [0.35, 0.4, 0.5], 'Parent', ax3, 'Interpreter', 'none');
+    text(0.04, 0.66, grade_str, 'FontSize', 10.5, 'FontWeight', 'bold', ...
+        'Color', [0.05, 0.05, 0.15], 'Parent', ax3, 'Interpreter', 'none');
+    text(0.04, 0.60, sprintf('AI Confidence: %.1f%% (Empirically Calibrated)', conf_pct), ...
+        'FontSize', 9.5, 'Color', [0.25, 0.3, 0.4], 'Parent', ax3, 'Interpreter', 'none');
 
     % Lesion Evidence Table Section
-    rectangle('Position', [0.02, 0.27, 0.96, 0.33], 'Curvature', 0.08, ...
+    rectangle('Position', [0.02, 0.24, 0.96, 0.32], 'Curvature', 0.08, ...
         'FaceColor', [1.0, 1.0, 1.0], 'EdgeColor', [0.85, 0.85, 0.88], 'Parent', ax3);
-    text(0.06, 0.55, 'OBJECTIVE LESION EVIDENCE TABLE', 'FontSize', 9.5, 'FontWeight', 'bold', ...
+    text(0.05, 0.51, 'OBJECTIVE LESION EVIDENCE', 'FontSize', 9.5, 'FontWeight', 'bold', ...
         'Color', [0.3, 0.35, 0.45], 'Parent', ax3, 'Interpreter', 'none');
-    text(0.06, 0.49, sprintf('• Microaneurysms Detected:     %d', n_ma), 'FontSize', 9.5, 'Parent', ax3, 'Interpreter', 'none');
-    text(0.06, 0.43, sprintf('• Hard Exudates (Lipids):        %d', n_hard), 'FontSize', 9.5, 'Parent', ax3, 'Interpreter', 'none');
-    text(0.06, 0.37, sprintf('• Soft Exudates (Cotton-Wool):   %d', n_soft), 'FontSize', 9.5, 'Parent', ax3, 'Interpreter', 'none');
-    text(0.06, 0.31, sprintf('• Retinal Hemorrhages:           %d', n_hem), 'FontSize', 9.5, 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.45, sprintf('• Microaneurysms:    %d', n_ma), 'FontSize', 9, 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.39, sprintf('• Hard Exudates:       %d', n_hard), 'FontSize', 9, 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.33, sprintf('• Soft Exudates:         %d', n_soft), 'FontSize', 9, 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.27, sprintf('• Hemorrhages:         %d', n_hem), 'FontSize', 9, 'Parent', ax3, 'Interpreter', 'none');
 
     % Total Lesion Area Badge
-    rectangle('Position', [0.62, 0.33, 0.33, 0.18], 'Curvature', 0.12, ...
+    rectangle('Position', [0.60, 0.28, 0.35, 0.21], 'Curvature', 0.12, ...
         'FaceColor', [0.93, 0.96, 1.0], 'EdgeColor', [0.75, 0.83, 0.95], 'Parent', ax3);
-    text(0.785, 0.44, 'Lesion Area', 'FontSize', 8.5, 'FontWeight', 'bold', ...
+    text(0.775, 0.42, 'Lesion Area', 'FontSize', 8.5, 'FontWeight', 'bold', ...
         'Color', [0.25, 0.35, 0.55], 'HorizontalAlignment', 'center', 'Parent', ax3, 'Interpreter', 'none');
-    text(0.785, 0.37, sprintf('%.2f%%', area_pct), 'FontSize', 12, 'FontWeight', 'bold', ...
+    text(0.775, 0.34, sprintf('%.2f%%', area_pct), 'FontSize', 12, 'FontWeight', 'bold', ...
         'Color', [0.1, 0.2, 0.55], 'HorizontalAlignment', 'center', 'Parent', ax3, 'Interpreter', 'none');
 
     % Doctor Sign-Off Section (<30 second target)
-    rectangle('Position', [0.02, 0.02, 0.96, 0.22], 'Curvature', 0.08, ...
+    rectangle('Position', [0.02, 0.02, 0.96, 0.19], 'Curvature', 0.08, ...
         'FaceColor', [0.94, 0.96, 0.99], 'EdgeColor', [0.75, 0.82, 0.92], 'Parent', ax3);
-    text(0.06, 0.18, 'OPHTHALMOLOGIST REVIEW & SIGN-OFF (<30s):', ...
-        'FontSize', 9.5, 'FontWeight', 'bold', 'Color', [0.1, 0.2, 0.4], 'Parent', ax3, 'Interpreter', 'none');
-    text(0.06, 0.12, '[  ] Accept AI Recommendation        [  ] Override Grade: ______', ...
-        'FontSize', 9.5, 'Parent', ax3, 'Interpreter', 'none');
-    text(0.06, 0.05, 'Clinician Signature: ___________________     Date: ____________', ...
-        'FontSize', 9, 'Color', [0.3, 0.3, 0.35], 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.15, 'OPHTHALMOLOGIST REVIEW & SIGN-OFF (<30s):', ...
+        'FontSize', 9, 'FontWeight', 'bold', 'Color', [0.1, 0.2, 0.4], 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.095, '[  ] Accept AI Recommendation        [  ] Override Grade: ______', ...
+        'FontSize', 9, 'Parent', ax3, 'Interpreter', 'none');
+    text(0.05, 0.04, 'Clinician Signature: ___________________     Date: ____________', ...
+        'FontSize', 8.5, 'Color', [0.3, 0.3, 0.35], 'Parent', ax3, 'Interpreter', 'none');
 end
