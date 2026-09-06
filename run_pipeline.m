@@ -59,7 +59,11 @@ fprintf('[3/6] Running structure segmentation...\n');
 vessel_mask = segment_vessels(img_processed);
 [ma_mask, ma_count, ma_confidence] = detect_microaneurysms(img_processed, disc_center, disc_radius);
 [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemorrhages(img_processed, disc_center, disc_radius);
-fprintf('      Disc located at (%.0f, %.0f), MA count: %d\n', disc_center(1), disc_center(2), ma_count);
+[nv_mask, is_nv_detected, nv_metrics] = detect_neovascularization(img_processed, vessel_mask, disc_center, disc_radius);
+lesion_counts.is_nv_detected = is_nv_detected;
+lesion_counts.nvd_detected = nv_metrics.nvd_detected;
+fprintf('      Disc located at (%.0f, %.0f), MA count: %d, Neovasc: %d\n', ...
+    disc_center(1), disc_center(2), ma_count, is_nv_detected);
 
 % --- Stage 4: Severity Grading (fusion) ---
 fprintf('[4/6] Grading severity (fusion of CNN + rule paths)...\n');

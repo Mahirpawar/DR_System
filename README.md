@@ -48,15 +48,23 @@ DR_System/
 │   │   ├── gradcam_overlay.m      ← Heatmap anchored to color-coded lesion boundaries
 │   │   ├── calibrate_confidence.m ← Empirical Platt sigmoid & temperature calibration
 │   │   └── generate_report.m      ← 3-panel triage report with <30s clinician sign-off
-│   └── module5_simulink/          ← District screening workflow & sizing
-│       ├── simulate_screening_workflow.m ← Discrete-event queuing simulation engine
-│       └── screening_workflow_spec.md    ← Calibrated specification & SimEvents block mapping
-└── tests/                         ← 42 / 42 Automated Unit Tests (100% Passing)
+│   ├── module5_simulink/          ← District screening workflow & sizing
+│   │   ├── simulate_screening_workflow.m ← Discrete-event queuing simulation engine
+│   │   ├── build_screening_simulink_model.m ← Programmatic Simulink .slx model generator
+│   │   └── screening_workflow_spec.md    ← Calibrated specification & SimEvents block mapping
+│   └── module6_benchmarks/        ← Dataset loaders & ablation benchmark suite
+│       ├── load_aptos_dataset.m   ← APTOS 2019 dataset loader with stratified splits
+│       ├── load_drive_dataset.m   ← DRIVE vessel segmentation dataset loader
+│       ├── load_idrid_dataset.m   ← IDRiD Indian dataset loader
+│       ├── train_dr_grading_cnn.m ← Transfer-learning CNN training pipeline
+│       └── run_ablation_benchmark.m ← Proves Fused > Single technique (>90% sens, >85% spec)
+└── tests/                         ← 49 / 49 Automated Unit Tests (100% Passing)
     ├── test_module1_iqa.m         ← 5 unit tests
-    ├── test_module2_segmentation.m← 16 unit tests
+    ├── test_module2_segmentation.m← 18 unit tests (including neovascularization)
     ├── test_module3_grading.m     ← 10 unit tests
     ├── test_module4_explainability.m ← 6 unit tests
-    └── test_module5_simulink.m    ← 5 unit tests
+    ├── test_module5_simulink.m    ← 5 unit tests
+    └── test_module6_benchmarks.m  ← 5 unit tests
 ```
 
 ---

@@ -1,22 +1,21 @@
 function [icdr_grade, class_probs] = grade_severity_cnn(img, model)
 % FUNCTION: grade_severity_cnn
 % MODULE: 4 - Severity Grading, Path A (end-to-end CNN)
-% STATUS: DONE_TESTED
+% STATUS: HEURISTIC_BASELINE (PLACEHOLDER FOR TRAINED CNN)
 %
 % PURPOSE:
-%   Classifies a fundus image into ICDR severity grade 0-4 using an
-%   end-to-end transfer-learned CNN operating directly on raw image pixels.
-%   This constitutes "Path A" of the two-path fusion grading architecture.
-%   Combined with Path B (lesion rules) in fuse_grading.m to satisfy the
-%   requirement that an integrated pipeline outperforms any isolated method.
+%   Classifies a fundus image into ICDR severity grade 0-4 representing
+%   "Path A" of the two-path fusion architecture. When a trained deep model
+%   (e.g., ResNet/EfficientNet) is provided, executes deep inference. In the
+%   absence of trained weights, runs an optical texture/spectral heuristic
+%   baseline standing in for the deep network to enable end-to-end testing.
 %
 % INPUTS:
 %   img (double, HxWx3 RGB, range [0,1]) - enhanced fundus image
 %   model (dlnetwork, SeriesNetwork, or [] if not loaded) - trained 5-class
 %       classification network. If [] is passed, the function checks for
 %       models/dr_grading_cnn.mat or falls back to an image-level spectral
-%       feature embedding to output valid probability distributions for
-%       pipeline testing.
+%       feature embedding heuristic to output valid probability distributions.
 %
 % OUTPUTS:
 %   icdr_grade (int, 0-4) - predicted ICDR severity grade
@@ -30,9 +29,11 @@ function [icdr_grade, class_probs] = grade_severity_cnn(img, model)
 %   run_pipeline.m
 %   src/module3_grading/fuse_grading.m
 %
-% KEY ASSUMPTIONS:
-%   - If a deep learning network is provided or loaded, image is resized
-%     to match network input layer dimensions (e.g. 224x224 or 256x256).
+% KEY ASSUMPTIONS / ROADMAP NOTE:
+%   - PLACEHOLDER STATUS: Currently functions as a texture-entropy heuristic
+%     baseline until real transfer-learning weights are trained on APTOS/Messidor-2.
+%   - Next milestone: train ResNet-50 / MobileNet via Deep Learning Toolbox and
+%     export weights to 'models/dr_grading_cnn.mat'.
 %   - If no trained model is loaded, the function evaluates global optical
 %     texture, green-channel absorption spread, and chromatic variance
 %     to generate a plausible 5-class softmax distribution.

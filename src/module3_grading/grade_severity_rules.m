@@ -75,10 +75,12 @@ function [icdr_grade, rule_confidence] = grade_severity_rules(vessel_mask, ma_co
     end
 
     % --- Multi-Stage ICDR Clinical Decision Rules ---
+    is_nv = (isfield(lesion_counts, 'is_nv_detected') && lesion_counts.is_nv_detected) || ...
+            (isfield(lesion_counts, 'nvd_detected') && lesion_counts.nvd_detected);
 
     % Condition 4: Proliferative DR (PDR)
-    % Extensive hemorrhage proliferation, very high total lesion area, or abnormal neovascularization proxy
-    is_grade_4 = (area_frac >= 0.050) || (n_hem >= 30) || (n_hem >= 15 && n_soft >= 5 && vessel_density > 0.18);
+    % Neovascularization detected (NVD/NVE), extensive hemorrhage proliferation, or very high total lesion area
+    is_grade_4 = is_nv || (area_frac >= 0.050) || (n_hem >= 30) || (n_hem >= 15 && n_soft >= 5 && vessel_density > 0.18);
 
     % Condition 3: Severe NPDR
     % 15+ hemorrhages, 3+ soft exudates (cotton-wool spots), or significant area fraction >= 0.025

@@ -1,15 +1,16 @@
 function overlay_img = gradcam_overlay(img, model, predicted_grade, lesion_masks)
 % FUNCTION: gradcam_overlay
 % MODULE: 5 - Explainability
-% STATUS: DONE_TESTED
+% STATUS: HEURISTIC_BASELINE (PLACEHOLDER FOR BACKPROP GRAD-CAM)
 %
 % PURPOSE:
-%   Generates a Grad-CAM visual attention heatmap reflecting the CNN
-%   decision for the predicted severity grade, overlaid on the original
-%   fundus image AND anchored against verified clinical lesion contours
-%   (microaneurysms, exudates, hemorrhages). This anchoring bridges the gap
-%   between deep learning attention and tangible clinical pathology,
-%   enabling ophthalmologists to verify AI reasoning in under 30 seconds.
+%   Generates visual attention heatmaps reflecting AI reasoning for the
+%   predicted severity grade, overlaid on the original fundus photograph
+%   AND anchored against verified clinical lesion contours (microaneurysms,
+%   exudates, hemorrhages). When a trained CNN is passed, backpropagation
+%   gradients (via Deep Learning Toolbox gradcam) produce activation maps;
+%   without a trained CNN, generates a spatial Gaussian saliency heatmap
+%   anchored to lesion density as a baseline placeholder.
 %
 % INPUTS:
 %   img (double, HxWx3 RGB, range [0,1]) - original or enhanced fundus image
@@ -36,11 +37,12 @@ function overlay_img = gradcam_overlay(img, model, predicted_grade, lesion_masks
 %   run_pipeline.m
 %   src/module4_explainability/generate_report.m
 %
-% KEY ASSUMPTIONS:
-%   - If a deep learning network is provided, Grad-CAM gradients w.r.t. the
-%     final convolutional layer are computed for the predicted_grade.
-%   - If model is empty ([]), the function generates a pathological attention
-%     density field synthesized from the verified lesion coordinates.
+% KEY ASSUMPTIONS / ROADMAP NOTE:
+%   - PLACEHOLDER STATUS: Currently computes a smoothed spatial attention map
+%     anchored to detected lesion centroids until real CNN backprop gradients
+%     are hooked up via 'gradcam(net, img, ...)' or 'dlfeval'.
+%   - Next milestone: hook real gradient backpropagation through final conv layer
+%     of trained ResNet once models/dr_grading_cnn.mat is trained.
 %   - Anchoring: Attention heatmaps alone can be diffuse and non-specific.
 %     Superimposing sharp, high-contrast lesion boundaries gives the clinician
 %     immediate visual confirmation that attention maps correspond to real lesions.

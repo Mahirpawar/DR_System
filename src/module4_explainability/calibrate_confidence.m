@@ -1,15 +1,16 @@
 function calibrated_confidence = calibrate_confidence(raw_confidence, calibration_model)
 % FUNCTION: calibrate_confidence
 % MODULE: 5 - Explainability
-% STATUS: DONE_TESTED
+% STATUS: HEURISTIC_BASELINE (PLACEHOLDER FOR DATASET-CALIBRATED FIT)
 %
 % PURPOSE:
 %   Transforms raw model confidence scores into calibrated empirical
 %   probabilities. Deep learning softmax and heuristic scoring methods
-%   frequently suffer from overconfidence (e.g., claiming 99% certainty on
-%   ambiguous borderline cases). Calibration ensures that when the system
-%   reports "85% confidence", the diagnosis is empirically accurate ~85% of
-%   the time, providing trustworthy numbers for doctor sign-off.
+%   frequently suffer from overconfidence. Calibration ensures that when
+%   the system reports "85% confidence", the diagnosis is empirically
+%   accurate ~85% of the time, providing trustworthy numbers for doctor sign-off.
+%   Uses empirical default parameters (A=4.20, B=-1.95) as a baseline placeholder
+%   until fitted on validation dataset log-odds.
 %
 % INPUTS:
 %   raw_confidence (double, 0-1) - uncalibrated confidence score from

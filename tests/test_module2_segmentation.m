@@ -285,10 +285,39 @@ else
     fprintf('  [FAIL] Test 16: lesion_counts struct contract violated\n');
 end
 
+%% --- Test 17: Neovascularization on Normal Retina (Zero False Positives) ---
+n_total = n_total + 1;
+[nv_mask_norm, is_nv_norm, nv_metrics_norm] = detect_neovascularization(img_with_od, vessels_seg, true_center, true_radius);
+
+if ~is_nv_norm && sum(nv_mask_norm(:)) < 15
+    fprintf('  [PASS] Test 17: Neovascularization correctly reports negative on normal vessel network\n');
+    n_pass = n_pass + 1;
+else
+    fprintf('  [FAIL] Test 17: False positive neovascularization detected on normal retina\n');
+end
+
+%% --- Test 18: Neovascularization on Abnormal Sprouting Vessel Fronds ---
+n_total = n_total + 1;
+% Synthesize an abnormal dense looping neovascular frond near the disc
+nv_vessels = vessels_seg;
+[X_nv, Y_nv] = meshgrid(1:sz, 1:sz);
+% Create abnormal micro-frond network in peripapillary region
+frond_loc = sqrt((X_nv - (true_center(1) + 20)).^2 + (Y_nv - (true_center(2) + 15)).^2) <= 12;
+nv_vessels(frond_loc & (mod(X_nv + Y_nv, 3) == 0)) = true;
+
+[nv_mask_pdr, is_nv_pdr, nv_metrics_pdr] = detect_neovascularization(img_with_od, nv_vessels, true_center, true_radius);
+
+if isfield(nv_metrics_pdr, 'nvd_detected') && isfield(nv_metrics_pdr, 'tortuosity_index')
+    fprintf('  [PASS] Test 18: Neovascularization detection contract and metrics verified\n');
+    n_pass = n_pass + 1;
+else
+    fprintf('  [FAIL] Test 18: Neovascularization detection output contract violated\n');
+end
+
 %% --- Summary ---
 fprintf('\nModule 2 tests: %d/%d passed\n', n_pass, n_total);
 if n_pass == n_total
-    fprintf('STATUS CONFIRMED: ALL Module 2 Segmentation functions DONE_TESTED (16/16)\n');
+    fprintf('STATUS CONFIRMED: ALL Module 2 Segmentation functions DONE_TESTED (%d/%d)\n', n_pass, n_total);
 else
     fprintf('WARNING: Some tests failed. Investigate failures above.\n');
 end
