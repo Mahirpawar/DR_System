@@ -71,7 +71,7 @@ function [ma_mask, ma_count, ma_confidence] = detect_microaneurysms(img, disc_ce
     fov_mask = imclose(fov_mask, se_fill);
     fov_mask = imfill(fov_mask, 'holes');
 
-    se_rim = strel('disk', max(5, round(min(h, w) * 0.035)));
+    se_rim = strel('disk', max(15, round(min(h, w) * 0.075)));
     fov_eroded = imerode(fov_mask, se_rim);
     if sum(fov_eroded(:)) < 100
         fov_eroded = true(h, w);
@@ -131,8 +131,8 @@ function [ma_mask, ma_count, ma_confidence] = detect_microaneurysms(img, disc_ce
 
     th_mean = mean(active_th);
     th_std  = std(active_th);
-    % Minimum response floor prevents noise in healthy eyes from triggering candidates
-    thresh  = max(0.045, th_mean + 3.2 * th_std);
+    % Minimum response floor prevents capillary crossings and sensor noise from triggering candidates
+    thresh  = max(0.065, th_mean + 3.8 * th_std);
 
     cand_mask = (th_response >= thresh) & search_zone;
     cc = bwconncomp(cand_mask);

@@ -75,7 +75,7 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
     fov_mask = imclose(fov_mask, se_fill);
     fov_mask = imfill(fov_mask, 'holes');
 
-    se_rim = strel('disk', max(5, round(min(h, w) * 0.035)));
+    se_rim = strel('disk', max(15, round(min(h, w) * 0.075)));
     fov_eroded = imerode(fov_mask, se_rim);
     if sum(fov_eroded(:)) < 100
         fov_eroded = true(h, w);
@@ -152,12 +152,12 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
         ex_mean = mean(active_ex_vals);
         ex_std  = std(active_ex_vals);
         % Absolute contrast floor prevents false detections on healthy background texture
-        ex_thresh = max(0.12, ex_mean + 3.5 * ex_std);
+        ex_thresh = max(0.14, ex_mean + 4.0 * ex_std);
         % Color requirements: yellowish/white with significant local contrast
-        color_ok = (R_ch > 0.50) & (G_ch > 0.35) & (ex_contrast >= ex_thresh);
+        color_ok = (R_ch > 0.55) & (G_ch > 0.40) & (ex_contrast >= ex_thresh);
         cand_ex = color_ok & ex_search;
 
-        min_ex_area = max(4, round(min(h, w) * 0.00002 * min(h, w)));
+        min_ex_area = max(5, round(min(h, w) * 0.00003 * min(h, w)));
         cand_ex = bwareaopen(cand_ex, min_ex_area);
         cc_ex = bwconncomp(cand_ex);
 
@@ -171,12 +171,11 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
                 mean_grad = mean(Gmag(pix));
                 area = props_ex(i).Area;
 
-                % Hard exudates: high gradient (sharp boundary) or compact
-                % Soft exudates (cotton wool): diffuse, lower gradient, larger
-                if mean_grad >= 0.035 || area < 40
-                    n_hard = n_hard + 1;
-                else
+                % Soft exudates (cotton-wool spots) must be genuine localized focal lesions
+                if area >= 35 && area <= 800 && mean_grad < 0.035 && mean(B_ch(pix)) > 0.15
                     n_soft = n_soft + 1;
+                elseif mean_grad >= 0.035 || area < 35
+                    n_hard = n_hard + 1;
                 end
                 exudate_mask(pix) = true;
             end
@@ -202,19 +201,24 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
         hem_mean = mean(active_hem_vals);
         hem_std  = std(active_hem_vals);
         % Absolute score floor prevents false detections on normal choroidal shading
-        hem_thresh = max(0.08, hem_mean + 3.5 * hem_std);
-        cand_hem = (hem_score >= hem_thresh) & (g_depression >= 0.05) & (R_ch > G_ch + 0.06) & hem_search;
+        hem_thresh = max(0.09, hem_mean + 4.0 * hem_std);
+        cand_hem = (hem_score >= hem_thresh) & (g_depression >= 0.06) & (R_ch > G_ch + 0.08) & hem_search;
 
-        min_hem_area = max(5, round(min(h, w) * 0.00003 * min(h, w)));
+        min_hem_area = max(10, round(min(h, w) * 0.00004 * min(h, w)));
         cand_hem = bwareaopen(cand_hem, min_hem_area);
         cc_hem = bwconncomp(cand_hem);
 
         if cc_hem.NumObjects > 0
-            props_hem = regionprops(cc_hem, 'PixelIdxList');
+            props_hem = regionprops(cc_hem, 'Area', 'Eccentricity', 'PixelIdxList');
             for k = 1:length(props_hem)
+                % Clinical rule: Hemorrhages (dot/blot) are compact round/oval extravasations.
+                % Reject elongated structures (Eccentricity > 0.82) which are vessel fragments.
+                if props_hem(k).Eccentricity > 0.82
+                    continue;
+                end
                 hemorrhage_mask(props_hem(k).PixelIdxList) = true;
+                n_hem = n_hem + 1;
             end
-            n_hem = int32(cc_hem.NumObjects);
         end
     end
 

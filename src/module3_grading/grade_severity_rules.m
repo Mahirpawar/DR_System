@@ -83,16 +83,16 @@ function [icdr_grade, rule_confidence] = grade_severity_rules(vessel_mask, ma_co
     is_grade_4 = is_nv || (area_frac >= 0.040) || (n_hem >= 35) || (n_hem >= 20 && n_soft >= 5 && vessel_density > 0.18);
 
     % Condition 3: Severe NPDR
-    % 20+ hemorrhages (ICDR 4-2-1 rule), 3+ soft exudates (cotton-wool spots), or significant area fraction >= 0.020
-    is_grade_3 = (n_hem >= 20) || (n_soft >= 3) || (area_frac >= 0.020);
+    % 20+ hemorrhages (ICDR 4-2-1 rule), 4+ soft exudates (cotton-wool spots), or significant area fraction >= 0.020
+    is_grade_3 = (n_hem >= 20) || (n_soft >= 4) || (area_frac >= 0.020);
 
     % Condition 2: Moderate NPDR
-    % Definite lesions: multiple hard exudates, moderate hemorrhages (>=5), or cotton-wool spot
-    is_grade_2 = (n_hard >= 2) || (n_hem >= 5) || (n_soft >= 1) || (area_frac >= 0.003) || (ma_cnt >= 8);
+    % Definite lesions: multiple hard exudates (>=3), moderate hemorrhages (>=6), multiple cotton-wool spots (>=2), or MAs (>=10)
+    is_grade_2 = (n_hard >= 3) || (n_hem >= 6) || (n_soft >= 2) || (area_frac >= 0.004) || (ma_cnt >= 10);
 
     % Condition 1: Mild NPDR
     % Microaneurysms present, but negligible exudates and hemorrhages
-    is_grade_1 = (ma_cnt >= 2) && (n_hard <= 1) && (n_soft == 0) && (n_hem <= 3);
+    is_grade_1 = (ma_cnt >= 2) && (n_hard <= 2) && (n_soft <= 1) && (n_hem <= 4);
 
     % Decision resolution
     if is_grade_4
