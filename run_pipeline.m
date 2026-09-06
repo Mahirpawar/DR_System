@@ -91,15 +91,37 @@ report_fig = generate_report(img_processed, overlay_img, final_grade, ...
     calibrated_confidence, is_referable, all_lesion_counts);
 
 % --- Stage 6: Save report ---
-fprintf('[6/6] Saving report...\n');
+fprintf('[6/6] Saving fresh diagnostic report...\n');
 if ~isfolder('output')
     mkdir('output');
 end
-saveas(report_fig, 'output/sample_report.png');
-fprintf('      Saved to output/sample_report.png\n');
 
-fprintf('\n=== Pipeline run complete ===\n');
-fprintf('Diagnostic report successfully generated and saved to output/sample_report.png\n');
+[~, img_stem, ~] = fileparts(image_path);
+if isempty(img_stem)
+    img_stem = 'patient';
+end
+patient_report_path = fullfile('output', sprintf('report_%s.png', img_stem));
+
+% Remove stale files to guarantee freshly written output
+if isfile(patient_report_path)
+    delete(patient_report_path);
+end
+if isfile('output/sample_report.png')
+    delete('output/sample_report.png');
+end
+
+saveas(report_fig, patient_report_path);
+saveas(report_fig, 'output/sample_report.png');
+fprintf('      Saved: %s\n', patient_report_path);
+fprintf('      Saved: output/sample_report.png\n');
+
+fprintf('\n=== Pipeline Run Complete ===\n');
+fprintf('  Patient ID:       %s\n', img_stem);
+fprintf('  Final Grade:      Grade %d\n', final_grade);
+fprintf('  Referable DR:     %d\n', is_referable);
+fprintf('  AI Confidence:    %.1f%%\n', calibrated_confidence * 100);
+fprintf('  Report Artifact:  %s\n\n', patient_report_path);
+
 if nargout == 0
     close(report_fig);
 end
