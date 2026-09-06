@@ -100,7 +100,10 @@ fprintf('      Saved to output/sample_report.png\n');
 
 fprintf('\n=== Pipeline run complete ===\n');
 fprintf('Diagnostic report successfully generated and saved to output/sample_report.png\n');
-close(report_fig);
+if nargout == 0
+    close(report_fig);
+end
+end
 
 function img = generate_pipeline_synthetic_fundus(sz)
     [X, Y] = meshgrid(1:sz, 1:sz);
