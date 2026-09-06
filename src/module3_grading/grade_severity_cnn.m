@@ -49,8 +49,10 @@ function [icdr_grade, class_probs] = grade_severity_cnn(img, model)
         model_file = fullfile('models', 'dr_grading_cnn.mat');
         if isfile(model_file)
             try
-                loaded = load(model_file, 'net');
-                if isfield(loaded, 'net')
+                loaded = load(model_file);
+                if isfield(loaded, 'trained_net')
+                    model = loaded.trained_net;
+                elseif isfield(loaded, 'net')
                     model = loaded.net;
                 end
             catch
