@@ -145,7 +145,7 @@ function report_fig = generate_report(img, overlay_img, final_grade, calibrated_
     text(0.06, 0.20, 'OPHTHALMOLOGIST REVIEW & SIGN-OFF (<30s):', ...
         'FontSize', 10, 'FontWeight', 'bold', 'Color', [0.1, 0.2, 0.4], 'Parent', ax3);
     text(0.06, 0.14, '[  ] Accept AI Recommendation        [  ] Override Grade: ______', ...
-        'FontSize', 10, 'Parent', ax3);
+        'FontSize', 10, 'Parent', ax3, 'Interpreter', 'none');
     text(0.06, 0.06, 'Clinician Signature: ___________________     Date: ____________', ...
-        'FontSize', 9.5, 'Color', [0.3, 0.3, 0.35], 'Parent', ax3);
+        'FontSize', 9.5, 'Color', [0.3, 0.3, 0.35], 'Parent', ax3, 'Interpreter', 'none');
 end
