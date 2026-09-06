@@ -83,14 +83,14 @@ function [quality_label, reason_code, metrics] = assess_image_quality(img)
     % borderline, then default to good. This keeps reason_code specific
     % rather than reporting the first metric checked regardless of
     % severity.
-    FOCUS_REJECT_THRESH   = 0.0003;
-    FOCUS_BORDERLINE_THRESH = 0.0008;
-    ILLUM_REJECT_LOW      = 0.04;
-    ILLUM_BORDERLINE_LOW  = 0.08;
-    MEAN_REJECT_DARK      = 0.12;
-    MEAN_REJECT_BRIGHT    = 0.90;
-    FOV_REJECT_THRESH     = 0.55;
-    FOV_BORDERLINE_THRESH = 0.70;
+    FOCUS_REJECT_THRESH     = 0.00006;
+    FOCUS_BORDERLINE_THRESH = 0.00045;
+    ILLUM_REJECT_LOW        = 0.02;
+    ILLUM_BORDERLINE_LOW    = 0.06;
+    MEAN_REJECT_DARK        = 0.08;
+    MEAN_REJECT_BRIGHT      = 0.92;
+    FOV_REJECT_THRESH       = 0.40;
+    FOV_BORDERLINE_THRESH   = 0.60;
 
     if focus_score < FOCUS_REJECT_THRESH
         quality_label = 'ungradeable';
