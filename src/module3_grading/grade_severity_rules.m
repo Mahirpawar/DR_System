@@ -87,12 +87,13 @@ function [icdr_grade, rule_confidence] = grade_severity_rules(vessel_mask, ma_co
     is_grade_3 = (n_hem >= 20) || (n_soft >= 4) || (area_frac >= 0.020);
 
     % Condition 2: Moderate NPDR
-    % Definite lesions: multiple hard exudates (>=3), moderate hemorrhages (>=6), multiple cotton-wool spots (>=2), or MAs (>=10)
-    is_grade_2 = (n_hard >= 3) || (n_hem >= 6) || (n_soft >= 2) || (area_frac >= 0.004) || (ma_cnt >= 10);
+    % Clinical Rule: Diabetic exudation requires microvascular breakdown (MAs present or extensive burden).
+    % Isolated tiny bright specs with zero microaneurysms represent non-diabetic glints/drusen.
+    is_grade_2 = (ma_cnt >= 8) || (n_hard >= 10) || (n_hard >= 4 && ma_cnt >= 2) || (n_hem >= 8) || (n_soft >= 2) || (area_frac >= 0.005);
 
     % Condition 1: Mild NPDR
-    % Microaneurysms present, but negligible exudates and hemorrhages
-    is_grade_1 = (ma_cnt >= 2) && (n_hard <= 2) && (n_soft <= 1) && (n_hem <= 4);
+    % Microaneurysms only (ICDR definition: MAs present, but no significant exudates/hemorrhages)
+    is_grade_1 = (ma_cnt >= 2 && ma_cnt < 8 && n_hard <= 3);
 
     % Decision resolution
     if is_grade_4

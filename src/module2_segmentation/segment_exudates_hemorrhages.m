@@ -152,12 +152,12 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
         ex_mean = mean(active_ex_vals);
         ex_std  = std(active_ex_vals);
         % Absolute contrast floor prevents false detections on healthy background texture
-        ex_thresh = max(0.14, ex_mean + 4.0 * ex_std);
-        % Color requirements: yellowish/white with significant local contrast
-        color_ok = (R_ch > 0.55) & (G_ch > 0.40) & (ex_contrast >= ex_thresh);
+        ex_thresh = max(0.18, ex_mean + 4.5 * ex_std);
+        % Color requirements: distinctly bright yellowish/white with significant local contrast
+        color_ok = (R_ch > 0.58) & (G_ch > 0.42) & (ex_contrast >= ex_thresh);
         cand_ex = color_ok & ex_search;
 
-        min_ex_area = max(5, round(min(h, w) * 0.00003 * min(h, w)));
+        min_ex_area = max(6, round(min(h, w) * 0.00004 * min(h, w)));
         cand_ex = bwareaopen(cand_ex, min_ex_area);
         cc_ex = bwconncomp(cand_ex);
 
@@ -172,9 +172,9 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
                 area = props_ex(i).Area;
 
                 % Soft exudates (cotton-wool spots) must be genuine localized focal lesions
-                if area >= 35 && area <= 800 && mean_grad < 0.035 && mean(B_ch(pix)) > 0.15
+                if area >= 50 && area <= 600 && mean_grad < 0.030 && mean(B_ch(pix)) > 0.18
                     n_soft = n_soft + 1;
-                elseif mean_grad >= 0.035 || area < 35
+                elseif mean_grad >= 0.030 || area < 50
                     n_hard = n_hard + 1;
                 end
                 exudate_mask(pix) = true;
