@@ -18,19 +18,23 @@
 %   Script runs end-to-end without warnings and saves a complete doctor-facing
 %   diagnostic report to output/sample_report.png.
 
-clear; clc;
-addpath(genpath('src'));
+function report_fig = run_pipeline(image_path)
 
-IMAGE_PATH = 'sample_data/example_fundus.jpg'; % UPDATE to a real image path
+if nargin < 1 || isempty(image_path)
+    image_path = 'sample_data/example_fundus.jpg';
+end
+
+addpath(genpath('src'));
 
 fprintf('=== DR Screening Pipeline — Integration Run ===\n\n');
 
-if ~isfile(IMAGE_PATH)
-    fprintf('No image found at %s — generating an anatomically realistic synthetic fundus.\n', IMAGE_PATH);
-    fprintf('(To test on patient photographs, place fundus images in sample_data/)\n\n');
+if ~isfile(image_path)
+    fprintf('No image found at %s — generating an anatomically realistic synthetic fundus.\n', image_path);
+    fprintf('(To test on patient photographs, place fundus images in data/aptos2019/train_images/)\n\n');
     img_raw = generate_pipeline_synthetic_fundus(512);
 else
-    img_raw = im2double(imread(IMAGE_PATH));
+    fprintf('Processing patient image: %s\n', image_path);
+    img_raw = im2double(imread(image_path));
 end
 
 % --- Stage 1: Image Quality Assessment ---
