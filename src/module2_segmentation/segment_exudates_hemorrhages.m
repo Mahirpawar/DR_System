@@ -133,8 +133,8 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
     end
 
     % --- Step 3: Exudate Segmentation (Hard & Soft) ---
-    % Search zone excludes optic disc and perimeter rim
-    ex_search = fov_eroded & (~od_exclusion);
+    % Search zone excludes optic disc, vessels (central light reflex), and perimeter rim
+    ex_search = fov_eroded & (~od_exclusion) & (~vessel_exclusion);
 
     % Feature map: combined red & green intensity with background suppression
     R_ch = img(:, :, 1);
@@ -149,9 +149,12 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
 
     active_ex_vals = ex_contrast(ex_search);
     if ~isempty(active_ex_vals) && any(active_ex_vals > 0)
-        ex_thresh = max(0.06, prctile(active_ex_vals, 99.0));
-        % Color requirements: yellowish/white (both R and G elevated, R >= G)
-        color_ok = (R_ch > 0.45) & (G_ch > 0.28) & (ex_contrast >= ex_thresh);
+        ex_mean = mean(active_ex_vals);
+        ex_std  = std(active_ex_vals);
+        % Absolute contrast floor prevents false detections on healthy background texture
+        ex_thresh = max(0.12, ex_mean + 3.5 * ex_std);
+        % Color requirements: yellowish/white with significant local contrast
+        color_ok = (R_ch > 0.50) & (G_ch > 0.35) & (ex_contrast >= ex_thresh);
         cand_ex = color_ok & ex_search;
 
         min_ex_area = max(4, round(min(h, w) * 0.00002 * min(h, w)));
@@ -196,8 +199,11 @@ function [exudate_mask, hemorrhage_mask, lesion_counts] = segment_exudates_hemor
 
     active_hem_vals = hem_score(hem_search);
     if ~isempty(active_hem_vals) && any(active_hem_vals > 0)
-        hem_thresh = max(0.035, prctile(active_hem_vals, 99.1));
-        cand_hem = (hem_score >= hem_thresh) & (R_ch > G_ch) & hem_search;
+        hem_mean = mean(active_hem_vals);
+        hem_std  = std(active_hem_vals);
+        % Absolute score floor prevents false detections on normal choroidal shading
+        hem_thresh = max(0.08, hem_mean + 3.5 * hem_std);
+        cand_hem = (hem_score >= hem_thresh) & (g_depression >= 0.05) & (R_ch > G_ch + 0.06) & hem_search;
 
         min_hem_area = max(5, round(min(h, w) * 0.00003 * min(h, w)));
         cand_hem = bwareaopen(cand_hem, min_hem_area);

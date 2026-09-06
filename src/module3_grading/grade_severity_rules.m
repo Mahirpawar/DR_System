@@ -79,32 +79,28 @@ function [icdr_grade, rule_confidence] = grade_severity_rules(vessel_mask, ma_co
             (isfield(lesion_counts, 'nvd_detected') && lesion_counts.nvd_detected);
 
     % Condition 4: Proliferative DR (PDR)
-    % Neovascularization detected (NVD/NVE), extensive hemorrhage proliferation, or very high total lesion area
-    is_grade_4 = is_nv || (area_frac >= 0.050) || (n_hem >= 30) || (n_hem >= 15 && n_soft >= 5 && vessel_density > 0.18);
+    % Neovascularization detected (NVD/NVE), extensive hemorrhage clusters, or very high total lesion area
+    is_grade_4 = is_nv || (area_frac >= 0.040) || (n_hem >= 35) || (n_hem >= 20 && n_soft >= 5 && vessel_density > 0.18);
 
     % Condition 3: Severe NPDR
-    % 15+ hemorrhages, 3+ soft exudates (cotton-wool spots), or significant area fraction >= 0.025
-    is_grade_3 = (n_hem >= 15) || (n_soft >= 3) || (area_frac >= 0.025);
+    % 20+ hemorrhages (ICDR 4-2-1 rule), 3+ soft exudates (cotton-wool spots), or significant area fraction >= 0.020
+    is_grade_3 = (n_hem >= 20) || (n_soft >= 3) || (area_frac >= 0.020);
 
     % Condition 2: Moderate NPDR
-    % More than MAs only (hard exudates, moderate hemorrhages, or 1-2 soft exudates)
-    is_grade_2 = (n_hard >= 1) || (n_hem >= 1) || (n_soft >= 1) || (area_frac >= 0.005) || (ma_cnt >= 8);
+    % Definite lesions: multiple hard exudates, moderate hemorrhages (>=5), or cotton-wool spot
+    is_grade_2 = (n_hard >= 2) || (n_hem >= 5) || (n_soft >= 1) || (area_frac >= 0.003) || (ma_cnt >= 8);
 
     % Condition 1: Mild NPDR
-    % Microaneurysms present, but no exudates and no hemorrhages
-    is_grade_1 = (ma_cnt >= 1) && (n_hard == 0) && (n_soft == 0) && (n_hem == 0);
-
-    % Condition 0: No DR
-    % Total absence of lesions
-    is_grade_0 = (ma_cnt == 0) && (n_hard == 0) && (n_soft == 0) && (n_hem == 0) && (area_frac < 0.001);
+    % Microaneurysms present, but negligible exudates and hemorrhages
+    is_grade_1 = (ma_cnt >= 2) && (n_hard <= 1) && (n_soft == 0) && (n_hem <= 3);
 
     % Decision resolution
     if is_grade_4
         icdr_grade = 4;
-        rule_confidence = 0.88 + 0.10 * min(1.0, (area_frac - 0.05) / 0.05);
+        rule_confidence = 0.88 + 0.10 * min(1.0, (area_frac - 0.04) / 0.04);
     elseif is_grade_3
         icdr_grade = 3;
-        rule_confidence = 0.82 + 0.12 * min(1.0, (n_hem - 15) / 15);
+        rule_confidence = 0.82 + 0.12 * min(1.0, (n_hem - 20) / 20);
     elseif is_grade_2
         icdr_grade = 2;
         rule_confidence = 0.80 + 0.10 * min(1.0, (n_hard + n_hem) / 10);
@@ -112,8 +108,9 @@ function [icdr_grade, rule_confidence] = grade_severity_rules(vessel_mask, ma_co
         icdr_grade = 1;
         rule_confidence = 0.85;
     else
+        % Grade 0: Normal retina (lesions absent or within sensor noise floor)
         icdr_grade = 0;
-        rule_confidence = 0.94;
+        rule_confidence = 0.95;
     end
 
     % Bounds check

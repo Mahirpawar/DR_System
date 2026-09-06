@@ -131,7 +131,8 @@ function [ma_mask, ma_count, ma_confidence] = detect_microaneurysms(img, disc_ce
 
     th_mean = mean(active_th);
     th_std  = std(active_th);
-    thresh  = max(prctile(active_th, 99.1), th_mean + 2.2 * th_std);
+    % Minimum response floor prevents noise in healthy eyes from triggering candidates
+    thresh  = max(0.045, th_mean + 3.2 * th_std);
 
     cand_mask = (th_response >= thresh) & search_zone;
     cc = bwconncomp(cand_mask);
